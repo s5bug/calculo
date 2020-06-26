@@ -4,8 +4,8 @@ pub const number_of_colors = 4;
 pub const board_width = 6;
 pub const board_height = 13;
 
-pub const ColorId = if(number_of_colors == 0) void else comptime blk: {
-    var result = 1;
+pub const ColorId = if(number_of_colors <= 1) void else comptime blk: {
+    var result = 0;
     var work = 1;
     while(work < number_of_colors) {
         result += 1;
