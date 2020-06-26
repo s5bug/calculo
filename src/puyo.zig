@@ -79,3 +79,9 @@ pub const drop_sets = .{
         drops.s
     }
 };
+
+pub fn possible_next_states(board: Board, drop: Drop) []Board {
+    // There's four different rotations for a drop.
+    // There's also some amount of placements for it based on its rotated width.
+    // ComptimeGrouping would make this much much easier than it is now...
+}
