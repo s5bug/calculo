@@ -4,14 +4,14 @@ pub const number_of_colors = 4;
 pub const board_width = 6;
 pub const board_height = 13;
 
-pub const ColorId = comptime blk: {
-    var result = 0;
-    var work = 0;
+pub const ColorId = if(number_of_colors == 0) void else comptime blk: {
+    var result = 1;
+    var work = 1;
     while(work < number_of_colors) {
-        work *= 2;
         result += 1;
+        work *= 2;
     }
-    break :blk if(result == 0) void else @Type(.{
+    break :blk @Type(.{
         .Int = .{
             .is_signed = false,
             .bits = result
