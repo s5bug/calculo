@@ -27,7 +27,7 @@ pub const Tile = union(enum) {
 
 pub const Board = [board_width][board_height]Tile;
 
-pub const Drop = [4]?u2;
+pub const Drop = [4]?ColorId;
 pub const DropSet = [16]Drop;
 
 pub const drops = .{
