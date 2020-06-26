@@ -6,9 +6,9 @@ pub const board_height = 13;
 
 pub const ColorId = comptime blk: {
     var result = 0;
-    var work = number_of_colors;
-    while(work > 1) {
-        work /= 2;
+    var work = 0;
+    while(work < number_of_colors) {
+        work *= 2;
         result += 1;
     }
     break :blk if(result == 0) void else @Type(.{
