@@ -4,19 +4,21 @@ pub const number_of_colors = 4;
 pub const board_width = 6;
 pub const board_height = 13;
 
-pub const ColorId = if(number_of_colors <= 1) void else comptime blk: {
-    var result = 0;
-    var work = 1;
-    while(work < number_of_colors) {
-        result += 1;
-        work *= 2;
-    }
-    break :blk @Type(.{
-        .Int = .{
-            .is_signed = false,
-            .bits = result
+pub const ColorId = comptime blk: {
+    if(number_of_colors > 0) {
+        var result = 0;
+        var work = 1;
+        while(work < number_of_colors) {
+            result += 1;
+            work *= 2;
         }
-    });
+        break :blk @Type(.{
+            .Int = .{
+                .is_signed = false,
+                .bits = result
+            }
+        });
+    } else @compileError("number_of_colors must be 1 or greater");
 };
 
 pub const Tile = union(enum) {
@@ -25,7 +27,7 @@ pub const Tile = union(enum) {
     empty
 };
 
-pub const Board = [board_width][board_height]Tile;
+pub const Board = [board_height][board_width]Tile;
 
 pub const Drop = [4]?ColorId;
 pub const DropSet = [16]Drop;
