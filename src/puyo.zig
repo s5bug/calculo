@@ -80,7 +80,16 @@ pub const drop_sets = .{
     }
 };
 
-pub fn possible_next_states(board: Board, drop: Drop) []Board {
+pub const Move = struct {
+    time: u32,
+    result: Board
+};
+
+pub const time_after_placement = 7;
+pub const time_after_pop = 30;
+pub const time_max_after_touch = 32;
+
+pub fn possible_next_states(board: Board, drop: Drop) []Move {
     // There's four different rotations for a drop.
     // There's also some amount of placements for it based on its rotated width.
     // ComptimeGrouping would make this much much easier than it is now...
