@@ -34,14 +34,28 @@ pub fn ComptimeGrouping(comptime I: type, comptime K: type, comptime ihash: fn (
                 }
                 break :blk .{
                     .groups = groups_tuple.tuple,
-                    .entries = entries_tuple.tuple
+                    .entries = entries_tuple.tuple,
                 };
             };
-            
+
             return @This(){
                 .groups = chm.ComptimeHashMap(I, chm.ComptimeHashMap(K, void, khash, keql), ihash, ieql).init(exports.groups),
                 .entries = chm.ComptimeHashMap(K, I, khash, keql).init(exports.entries),
             };
         }
     };
+}
+
+const testing = @import("std").testing;
+
+test "comptime grouping" {
+    const i = AutoComptimeGrouping(u2, [2]u8).init(.{
+        .{[2]u8{ 0, 0 }},
+        .{[2]u8{ 0, 1 }},
+    });
+
+    testing.expectEqual(@as(u2, 0), i.entries.get([2]u8{ 0, 0 }).?.*);
+    testing.expectEqual(@as(u2, 1), i.entries.get([2]u8{ 0, 1 }).?.*);
+    testing.expect(i.groups.get(0).?.*.has([2]u8{ 0, 0 }));
+    testing.expect(i.groups.get(1).?.*.has([2]u8{ 0, 1 }));
 }
