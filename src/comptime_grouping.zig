@@ -11,30 +11,36 @@ pub fn ComptimeGrouping(comptime I: type, comptime K: type, comptime ihash: fn (
         entries: chm.ComptimeHashMap(K, I, khash, keql),
 
         pub fn init(comptime values: var) @This() {
-            var groups_tuple = (struct {
-                tuple: var = .{},
-            }){};
-            var entries_tuple = (struct {
-                tuple: var = .{},
-            }){};
-            var group_index = 0;
-            for (values) |group| {
-                var group_set = (struct {
+            const exports = comptime blk: {
+                var groups_tuple = (struct {
                     tuple: var = .{},
                 }){};
-                for (group) |group_entry| {
-                    group_set.tuple = group_set.tuple ++ .{.{ group_entry, {} }};
-                    entries_tuple.tuple = entries_tuple.tuple ++ .{.{ group_entry, group_index }};
+                var entries_tuple = (struct {
+                    tuple: var = .{},
+                }){};
+                var group_index = 0;
+                for (values) |group| {
+                    var group_set = (struct {
+                        tuple: var = .{},
+                    }){};
+                    for (group) |group_entry| {
+                        group_set.tuple = group_set.tuple ++ .{.{ group_entry, {} }};
+                        entries_tuple.tuple = entries_tuple.tuple ++ .{.{ group_entry, group_index }};
+                    }
+
+                    groups_tuple.tuple = groups_tuple.tuple ++ .{.{ group_index, chm.ComptimeHashMap(K, void, khash, keql).init(group_set.tuple) }};
+
+                    group_index += 1;
                 }
-
-                groups_tuple.tuple = groups_tuple.tuple ++ .{.{ group_index, chm.ComptimeHashMap(K, void, khash, keql).init(group_set.tuple) }};
-
-                group_index += 1;
-            }
-
+                break :blk .{
+                    .groups = groups_tuple.tuple,
+                    .entries = entries_tuple.tuple
+                };
+            };
+            
             return @This(){
-                .groups = chm.ComptimeHashMap(I, chm.ComptimeHashMap(K, void, khash, keql), ihash, ieql).init(groups_tuple.tuple),
-                .entries = chm.ComptimeHashMap(K, I, khash, keql).init(entries_tuple.tuple),
+                .groups = chm.ComptimeHashMap(I, chm.ComptimeHashMap(K, void, khash, keql), ihash, ieql).init(exports.groups),
+                .entries = chm.ComptimeHashMap(K, I, khash, keql).init(exports.entries),
             };
         }
     };
