@@ -1,5 +1,7 @@
 const std = @import("std");
 
+const cg = @import("comptime_grouping.zig");
+
 pub const number_of_colors = 4;
 pub const board_width = 6;
 pub const board_height = 13;
@@ -29,15 +31,32 @@ pub const Tile = union(enum) {
 
 pub const Board = [board_height][board_width]Tile;
 
-pub const Drop = [4]?ColorId;
+/// A Drop is Coordinates grouped by ColorIds
+pub const Drop = cg.AutoComptimeGrouping(ColorId, [2]u8);
+
+/// A DropSet is an array of 16 Drops
 pub const DropSet = [16]Drop;
 
 pub const drops = .{
-    .i = [4]?ColorId{ 0, null, 1, null },
-    .lv = [4]?ColorId{ 0, 1, 0, null },
-    .lh = [4]?ColorId{ 0, 0, 1, null },
-    .s = [4]?ColorId{ 0, 1, 0, 1 },
-    .o = [4]?ColorId{ 0, 0, 0, 0 }
+    .i = cg.AutoComptimeGrouping(ColorId, [2]u8).init(.{
+        .{ [2]u8{ 0, 0 } },
+        .{ [2]u8{ 0, 1 } }
+    }),
+    .lv = cg.AutoComptimeGrouping(ColorId, [2]u8).init(.{
+        .{ [2]u8{ 0, 0 }, [2]u8{ 0, 1 } },
+        .{ [2]u8{ 1, 0 } }
+    }),
+    .lh = cg.AutoComptimeGrouping(ColorId, [2]u8).init(.{
+        .{ [2]u8{ 0, 0 }, [2]u8{ 1, 0 } },
+        .{ [2]u8{ 0, 1 } }
+    }),
+    .s = cg.AutoComptimeGrouping(ColorId, [2]u8).init(.{
+        .{ [2]u8{ 0, 0 }, [2]u8{ 0, 1 } },
+        .{ [2]u8{ 1, 0 }, [2]u8{ 1, 1 } }
+    }),
+    .o = cg.AutoComptimeGrouping(ColorId, [2]u8).init(.{
+        .{ [2]u8{ 0, 0 }, [2]u8{ 1, 0 }, [2]u8{ 0, 1 }, [2]u8{ 1, 1 } }
+    })
 };
 
 pub const drop_sets = .{
