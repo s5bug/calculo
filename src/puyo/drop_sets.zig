@@ -1,8 +1,6 @@
-const drops = @import("drops.zig");
+usingnamespace @import("constants.zig");
 
-const constants = @import("constants.zig");
-const Drop = constants.Drop;
-const DropSet = constants.DropSet;
+const drops = @import("drops.zig");
 
 pub const tsu: DropSet = [1]Drop{drops.i} ** 16;
 pub const ringo: DropSet = [16]Drop{

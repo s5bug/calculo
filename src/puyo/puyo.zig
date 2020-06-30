@@ -2,10 +2,7 @@ const std = @import("std");
 
 const cg = @import("../comptime_grouping.zig");
 
-const constants = @import("constants.zig");
-const ColorId = constants.ColorId;
-const board_width = constants.board_width;
-const board_height = constants.board_height;
+usingnamespace @import("constants.zig");
 
 pub const Tile = union(enum) {
     puyo: ColorId, garbage, empty

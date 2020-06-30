@@ -1,7 +1,6 @@
 const cg = @import("../comptime_grouping.zig");
 
-const ColorId = @import("constants.zig").ColorId;
-const Drop = @import("constants.zig").Drop;
+usingnamespace @import("constants.zig");
 
 pub const i: Drop = cg.AutoComptimeGrouping(ColorId, [2]u8).init(.{
     .{[2]u8{ 0, 0 }},
