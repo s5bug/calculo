@@ -1,4 +1,4 @@
-pub const number_of_colors = 4;
+pub const number_of_colors = 5;
 pub const board_width = 6;
 pub const board_height = 13;
 

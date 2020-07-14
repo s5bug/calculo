@@ -2,6 +2,42 @@ const std = @import("std");
 
 const puyo = @import("puyo/puyo.zig");
 
+const state = @import("calculo/state.zig");
+const provider = @import("calculo/provider.zig");
+
+const TestProvider = struct {
+    lstate: state.GameState = state.GameState{
+        .colors = ([_]puyo.ColorId{ 0, 1, 2, 3 })[0..],
+        .board = [1][puyo.board_width]puyo.Tile{[1]puyo.Tile{.empty} ** puyo.board_width} ** puyo.board_height,
+        .current_piece = state.CurrentPiece{
+            .piece = puyo.Piece{
+                .drop = puyo.drops.i,
+                .colors = ([2]puyo.ColorId{ 1, 2 })[0..],
+            },
+            .rotation = state.PieceRotation.Up,
+            .position = [2]u8{ 0, 0 }, // TODO name common positions
+        },
+        .queue = [2]puyo.Piece{
+            puyo.Piece{
+                .drop = puyo.drops.i,
+                .colors = ([2]puyo.ColorId{ 0, 0 })[0..],
+            },
+            puyo.Piece{
+                .drop = puyo.drops.i,
+                .colors = ([2]puyo.ColorId{ 2, 3 })[0..],
+            },
+        },
+    },
+    pub const Self = @This();
+    pub fn init(self: *Self) void {
+        std.debug.print("Hello!", .{});
+    }
+    pub fn pull(self: *Self) state.GameState {
+        return lstate;
+    }
+};
+
 pub fn main() anyerror!void {
-    std.debug.warn("All your {} are belong to us.\n", .{puyo.drop_sets.sig[3].entries.get([2]u8{ 1, 0 }).?.*});
+    var tprovider = TestProvider{};
+    provider.do_thing(tprovider);
 }

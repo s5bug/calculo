@@ -27,7 +27,7 @@ pub fn ComptimeHashMap(comptime K: type, comptime V: type, comptime hash: fn (ke
         max_distance_from_start_index: usize,
         entries: []const Entry,
 
-        pub fn init(comptime values: var) @This() {
+        pub fn init(comptime values: anytype) @This() {
             const globals = comptime blk: {
                 std.debug.assert(values.len != 0);
                 @setEvalBranchQuota(1000 * values.len);

@@ -10,18 +10,18 @@ pub fn ComptimeGrouping(comptime I: type, comptime K: type, comptime ihash: fn (
         groups: chm.ComptimeHashMap(I, chm.ComptimeHashMap(K, void, khash, keql), ihash, ieql),
         entries: chm.ComptimeHashMap(K, I, khash, keql),
 
-        pub fn init(comptime values: var) @This() {
+        pub fn init(comptime values: anytype) @This() {
             const exports = comptime blk: {
                 var groups_tuple = (struct {
-                    tuple: var = .{},
+                    tuple: anytype = .{},
                 }){};
                 var entries_tuple = (struct {
-                    tuple: var = .{},
+                    tuple: anytype = .{},
                 }){};
                 var group_index = 0;
                 for (values) |group| {
                     var group_set = (struct {
-                        tuple: var = .{},
+                        tuple: anytype = .{},
                     }){};
                     for (group) |group_entry| {
                         group_set.tuple = group_set.tuple ++ .{.{ group_entry, {} }};
