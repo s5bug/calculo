@@ -29,11 +29,11 @@ const TestProvider = struct {
         },
     },
     pub const Self = @This();
-    pub fn init(self: *Self) void {
+    pub fn init(self: *const Self) void {
         std.debug.print("Hello!", .{});
     }
-    pub fn pull(self: *Self) state.GameState {
-        return lstate;
+    pub fn pull(self: *const Self) state.GameState {
+        return self.lstate;
     }
 };
 
