@@ -14,7 +14,7 @@ pub const Board = [board_height][board_width]Tile;
 
 pub const Piece = struct {
     drop: Drop,
-    colors: [drop.groups.entries.len]ColorId,
+    colors: []const ColorId,
 };
 
 pub fn is_valid_piece(piece: Piece) bool {
