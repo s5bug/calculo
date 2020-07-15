@@ -14,6 +14,9 @@ pub fn build(b: *Builder) void {
     const exe = b.addExecutable("calculo", "src/main.zig");
     exe.setTarget(target);
     exe.setBuildMode(mode);
+
+    exe.addPackagePath("zgl", "lib/zgl/zgl.zig");
+
     exe.install();
 
     const run_cmd = exe.run();

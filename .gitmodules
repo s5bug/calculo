@@ -1,0 +1,3 @@
+[submodule "lib/zgl"]
+	path = lib/zgl
+	url = https://github.com/ziglibs/zgl.git
