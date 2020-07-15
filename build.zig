@@ -15,6 +15,11 @@ pub fn build(b: *Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
 
+    exe.linkSystemLibrary("c");
+    exe.linkSystemLibrary("sdl2");
+    exe.linkSystemLibrary("SDL2_image");
+
+    exe.addPackagePath("sdl2", "lib/sdl2/src/lib.zig");
     exe.addPackagePath("zgl", "lib/zgl/zgl.zig");
 
     exe.install();

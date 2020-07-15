@@ -38,6 +38,7 @@ const TestProvider = struct {
 };
 
 pub fn main() anyerror!void {
-    var tprovider = TestProvider{};
-    provider.do_thing(tprovider);
+    // var tprovider = TestProvider{};
+    // provider.do_thing(tprovider);
+    try @import("ui/ui.zig").init();
 }

@@ -1,3 +1,6 @@
 [submodule "lib/zgl"]
 	path = lib/zgl
 	url = https://github.com/ziglibs/zgl.git
+[submodule "lib/sdl2"]
+	path = lib/sdl2
+	url = https://github.com/MasterQ32/SDL.zig.git
