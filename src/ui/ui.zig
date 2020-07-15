@@ -30,20 +30,17 @@ pub fn init() anyerror!void {
         try renderer.setColorRGB(0, 0, 0);
         try renderer.clear();
 
-        const source = sdl.Rectangle {
-            .x = 0,
-            .y = 0,
-            .width = 32,
-            .height = 32,
-        };
-        const target = sdl.Rectangle {
+        const target = sdl.Rectangle{
             .x = 32,
             .y = 32,
             .width = 32,
             .height = 32,
         };
 
-        try renderer.copy(tilesheet, target, source);
+        try renderer.copy(tilesheet, target, res.tilesheet_position_single(.green, .{
+            .down = true,
+            .right = true,
+        }));
 
         renderer.present();
     }
