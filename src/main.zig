@@ -40,5 +40,5 @@ const TestProvider = struct {
 pub fn main() anyerror!void {
     // var tprovider = TestProvider{};
     // provider.do_thing(tprovider);
-    try @import("ui/ui.zig").init();
+    try @import("ui/ui.zig").run(std.heap.c_allocator);
 }
