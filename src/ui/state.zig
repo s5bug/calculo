@@ -80,3 +80,12 @@ pub fn main_menu_to_controller_configuration(alloc: *std.mem.Allocator, state: *
     };
     state.*.screen = UIScreen{ .controller_configuration = new_screen };
 }
+
+pub fn controller_configuration_to_main_menu(alloc: *std.mem.Allocator, state: *UIState) !void {
+    alloc.destroy(state.*.screen.controller_configuration);
+    const new_screen = try alloc.create(MainMenuState);
+    new_screen.* = MainMenuState{
+        .selected_button = .configure_controllers,
+    };
+    state.*.screen = UIScreen{ .main_menu = new_screen };
+}
