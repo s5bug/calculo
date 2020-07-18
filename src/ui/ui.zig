@@ -26,7 +26,7 @@ pub fn run(alloc: *std.mem.Allocator) anyerror!void {
     try state.init_main_menu(allocator, cur_state);
 
     while (!ray.WindowShouldClose()) {
-        switch (cur_state.*) {
+        switch (cur_state.*.screen) {
             .main_menu => |main_menu_state| blk: {
                 if (ray.IsKeyPressed(ray.KEY_UP)) {
                     main_menu_state.*.selected_button = main_menu_state.*.selected_button.previous();
@@ -63,7 +63,9 @@ pub fn run(alloc: *std.mem.Allocator) anyerror!void {
                 ray.EndDrawing();
 
                 if (ray.IsKeyPressed(ray.KEY_ENTER)) {
-                    // TODO free main_menu, allocate next state
+                    if (main_menu_state.*.selected_button == .configure_controllers) {
+                        try state.main_menu_to_controller_configuration(allocator, cur_state);
+                    }
                 }
             },
             else => unreachable,
