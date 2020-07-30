@@ -52,9 +52,9 @@ pub fn main() anyerror!void {
     const ctx = algae.futhark_context_new(conf);
     defer algae.futhark_context_free(ctx);
 
-    var data: [1]u32 = [_]u32{0};
-    const input = algae.futhark_new_u32_2d(ctx, &data, 1, 1);
-    defer _ = algae.futhark_free_u32_2d(ctx, input);
+    var data: [1]u8 = [_]u8{2};
+    const input = algae.futhark_new_u8_2d(ctx, &data, 1, 1);
+    defer _ = algae.futhark_free_u8_2d(ctx, input);
 
     var out: *bool = try alloc.create(bool);
     defer alloc.destroy(out);
