@@ -52,7 +52,7 @@ pub fn main() anyerror!void {
     const ctx = algae.futhark_context_new(conf);
     defer algae.futhark_context_free(ctx);
 
-    var data: [1]u32 = [_]u32{ 0 };
+    var data: [1]u32 = [_]u32{0};
     const input = algae.futhark_new_u32_2d(ctx, &data, 1, 1);
     defer _ = algae.futhark_free_u32_2d(ctx, input);
 
@@ -61,5 +61,5 @@ pub fn main() anyerror!void {
 
     _ = algae.futhark_entry_main(ctx, out, input);
 
-    std.debug.print("The result should be true: {}\n", .{ out.* });
+    std.debug.print("The result should be true: {}\n", .{out.*});
 }
