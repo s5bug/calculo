@@ -5,6 +5,10 @@ const puyo = @import("puyo/puyo.zig");
 const state = @import("calculo/state.zig");
 const provider = @import("calculo/provider.zig");
 
+const algae = @cImport({
+    @cInclude("algae.h");
+});
+
 const TestProvider = struct {
     lstate: state.GameState = state.GameState{
         .colors = &[_]puyo.ColorId{ 0, 1, 2, 3 },
@@ -40,5 +44,22 @@ const TestProvider = struct {
 pub fn main() anyerror!void {
     // var tprovider = TestProvider{};
     // provider.do_thing(tprovider);
-    try @import("ui/ui.zig").run(std.heap.c_allocator);
+    // try @import("ui/ui.zig").run(std.heap.c_allocator);
+    const alloc = std.heap.c_allocator;
+
+    const conf = algae.futhark_context_config_new();
+    defer algae.futhark_context_config_free(conf);
+    const ctx = algae.futhark_context_new(conf);
+    defer algae.futhark_context_free(ctx);
+
+    var data: [1]u32 = [_]u32{ 0 };
+    const input = algae.futhark_new_u32_2d(ctx, &data, 1, 1);
+    defer _ = algae.futhark_free_u32_2d(ctx, input);
+
+    var out: *bool = try alloc.create(bool);
+    defer alloc.destroy(out);
+
+    _ = algae.futhark_entry_main(ctx, out, input);
+
+    std.debug.print("The result should be true: {}\n", .{ out.* });
 }

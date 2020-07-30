@@ -16,9 +16,14 @@ pub fn build(b: *Builder) void {
     exe.setBuildMode(mode);
 
     exe.linkSystemLibrary("c");
+    exe.linkSystemLibrary("opencl");
     exe.linkSystemLibrary("raylib");
 
-    const fut = b.addSystemCommand(&[_][]const u8{"futhark", "opencl", "--library", "src/algae/algae.fut"});
+    exe.addIncludeDir("src/algae/");
+    exe.addCSourceFile("src/algae/algae.c", &[_][]const u8{"-std=c99"});
+    const fut = b.addSystemCommand(
+        &[_][]const u8{"futhark", "opencl", "--library", "src/algae/algae.fut"}
+    );
     exe.step.dependOn(&fut.step);
 
     exe.install();
