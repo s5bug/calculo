@@ -1,7 +1,6 @@
 type tile = #empty | #nuisance | #puyo u32
-type board = [13][6]tile
 
-let deserialize_board(in_board: [][]u32) =
+let deserialize_board(in_board: [][]u32): [][]tile =
   let f x : tile =
     match x & 0b11
       case 0 -> #empty

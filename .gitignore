@@ -23,3 +23,6 @@ build-*/
 docgen_tmp/
 
 # End of https://www.toptal.com/developers/gitignore/api/visualstudiocode,zig
+
+src/algae/algae.c
+src/algae/algae.h
