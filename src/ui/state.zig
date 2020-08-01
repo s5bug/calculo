@@ -35,8 +35,14 @@ pub const ControllerConfigurationState = struct {
     selected_button: ControllerConfigurationButton,
 };
 
-pub const ControllerConfigurationButton = union(enum) {
-    back, remove_controller, add_controller, controller: u2
+pub const ControllerConfigurationButton = enum {
+    back, 
+    remove_controller,
+    add_controller,
+    controller_1,
+    controller_2,
+    controller_3,
+    controller_4, // Until Zig better supports tagged unions with optional data, 4 players have to be hardcoded
 };
 
 pub const CharacterSelectState = struct {};
@@ -66,7 +72,7 @@ pub fn main_menu_to_controller_configuration(alloc: *std.mem.Allocator, state: *
     alloc.destroy(state.*.screen.main_menu);
     const new_screen = try alloc.create(ControllerConfigurationState);
     new_screen.* = ControllerConfigurationState{
-        .selected_button = if (state.controllers.len >= 4) .back else .add_controller,
+        .selected_button = .back,
     };
     state.*.screen = UIScreen{ .controller_configuration = new_screen };
 }
