@@ -29,24 +29,14 @@ pub const MainMenuState = struct {
 pub const MainMenuButton = enum {
     go,
     configure_controllers,
-
-    pub fn next(self: MainMenuButton) MainMenuButton {
-        return switch (self) {
-            .go => .configure_controllers,
-            .configure_controllers => .go,
-        };
-    }
-
-    pub fn previous(self: MainMenuButton) MainMenuButton {
-        return switch (self) {
-            .go => .configure_controllers,
-            .configure_controllers => .go,
-        };
-    }
 };
 
 pub const ControllerConfigurationState = struct {
-    fill: u8,
+    selected_button: ControllerConfigurationButton,
+};
+
+pub const ControllerConfigurationButton = union(enum) {
+    back, remove_controller, add_controller, controller: u2
 };
 
 pub const CharacterSelectState = struct {};
@@ -63,7 +53,7 @@ pub const BattlePlayer = struct {
 pub fn init_main_menu(alloc: *std.mem.Allocator, state: *UIState) !void {
     const new_main_menu = try alloc.create(MainMenuState);
     new_main_menu.* = MainMenuState{
-        .selected_button = .go,
+        .selected_button = .configure_controllers,
     };
     const no_controllers = try alloc.alloc(Controller, 0);
     state.* = UIState{
@@ -76,7 +66,7 @@ pub fn main_menu_to_controller_configuration(alloc: *std.mem.Allocator, state: *
     alloc.destroy(state.*.screen.main_menu);
     const new_screen = try alloc.create(ControllerConfigurationState);
     new_screen.* = ControllerConfigurationState{
-        .fill = 0,
+        .selected_button = if (state.controllers.len >= 4) .back else .add_controller,
     };
     state.*.screen = UIScreen{ .controller_configuration = new_screen };
 }
