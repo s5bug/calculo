@@ -119,64 +119,50 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
 
     if (ray.IsKeyPressed(ray.KEY_LEFT) and
         controller_configuration_state.selected_button == .add_controller and
-        can_remove) {
+        can_remove)
+    {
         controller_configuration_state.selected_button = .remove_controller;
     }
 
     if (ray.IsKeyPressed(ray.KEY_RIGHT) and
         controller_configuration_state.selected_button == .remove_controller and
-        can_add) {
+        can_add)
+    {
         controller_configuration_state.selected_button = .add_controller;
     }
 
-    if(ray.IsKeyPressed(ray.KEY_UP)) {
-        controller_configuration_state.selected_button = switch(controller_configuration_state.selected_button) {
+    if (ray.IsKeyPressed(ray.KEY_UP)) {
+        controller_configuration_state.selected_button = switch (controller_configuration_state.selected_button) {
             .remove_controller, .add_controller => .back,
             .back => .back,
-            .controller_1 =>
-                if(can_add) state.ControllerConfigurationButton.add_controller
-                else state.ControllerConfigurationButton.remove_controller,
+            .controller_1 => if (can_add) state.ControllerConfigurationButton.add_controller else state.ControllerConfigurationButton.remove_controller,
             .controller_2 => .controller_1,
             .controller_3 => .controller_2,
             .controller_4 => .controller_3,
         };
     }
-    if(ray.IsKeyPressed(ray.KEY_DOWN)) {
-        controller_configuration_state.selected_button = switch(controller_configuration_state.selected_button) {
-            .back =>
-                if(can_add) state.ControllerConfigurationButton.add_controller
-                else state.ControllerConfigurationButton.remove_controller,
-            .remove_controller =>
-                if(cur_state.controllers.len > 0) state.ControllerConfigurationButton.controller_1
-                else state.ControllerConfigurationButton.remove_controller,
-            .add_controller =>
-                if(cur_state.controllers.len > 0) state.ControllerConfigurationButton.controller_1
-                else state.ControllerConfigurationButton.add_controller,
-            .controller_1 =>
-                if(cur_state.controllers.len > 1) state.ControllerConfigurationButton.controller_2
-                else state.ControllerConfigurationButton.controller_1,
-            .controller_2 =>
-                if(cur_state.controllers.len > 2) state.ControllerConfigurationButton.controller_3
-                else state.ControllerConfigurationButton.controller_2,
-            .controller_3 =>
-                if(cur_state.controllers.len > 3) state.ControllerConfigurationButton.controller_4
-                else state.ControllerConfigurationButton.controller_3,
-            .controller_4 => .controller_4
+    if (ray.IsKeyPressed(ray.KEY_DOWN)) {
+        controller_configuration_state.selected_button = switch (controller_configuration_state.selected_button) {
+            .back => if (can_add) state.ControllerConfigurationButton.add_controller else state.ControllerConfigurationButton.remove_controller,
+            .remove_controller => if (cur_state.controllers.len > 0) state.ControllerConfigurationButton.controller_1 else state.ControllerConfigurationButton.remove_controller,
+            .add_controller => if (cur_state.controllers.len > 0) state.ControllerConfigurationButton.controller_1 else state.ControllerConfigurationButton.add_controller,
+            .controller_1 => if (cur_state.controllers.len > 1) state.ControllerConfigurationButton.controller_2 else state.ControllerConfigurationButton.controller_1,
+            .controller_2 => if (cur_state.controllers.len > 2) state.ControllerConfigurationButton.controller_3 else state.ControllerConfigurationButton.controller_2,
+            .controller_3 => if (cur_state.controllers.len > 3) state.ControllerConfigurationButton.controller_4 else state.ControllerConfigurationButton.controller_3,
+            .controller_4 => .controller_4,
         };
     }
-    if(ray.IsKeyPressed(ray.KEY_LEFT) and controller_configuration_state.selected_button == .add_controller and can_remove) {
+    if (ray.IsKeyPressed(ray.KEY_LEFT) and controller_configuration_state.selected_button == .add_controller and can_remove) {
         controller_configuration_state.selected_button = .remove_controller;
     }
-    if(ray.IsKeyPressed(ray.KEY_RIGHT) and controller_configuration_state.selected_button == .remove_controller and can_add) {
+    if (ray.IsKeyPressed(ray.KEY_RIGHT) and controller_configuration_state.selected_button == .remove_controller and can_add) {
         controller_configuration_state.selected_button = .add_controller;
     }
 
-    if(ray.IsKeyPressed(ray.KEY_ENTER)) {
-        switch(controller_configuration_state.selected_button) {
+    if (ray.IsKeyPressed(ray.KEY_ENTER)) {
+        switch (controller_configuration_state.selected_button) {
             .back => try state.controller_configuration_to_main_menu(allocator, cur_state),
-            .add_controller => {
-
-            },
+            .add_controller => {},
             else => unreachable,
         }
     }

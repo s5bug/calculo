@@ -36,7 +36,7 @@ pub const ControllerConfigurationState = struct {
 };
 
 pub const ControllerConfigurationButton = enum {
-    back, 
+    back,
     remove_controller,
     add_controller,
     controller_1,
