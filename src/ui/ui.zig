@@ -29,6 +29,7 @@ pub fn run(alloc: *std.mem.Allocator) anyerror!void {
         switch (cur_state.screen) {
             .main_menu => try handle_main_menu(allocator, cur_state),
             .controller_configuration => try handle_controller_configuration(allocator, cur_state),
+            .add_controller => try handle_add_controller(allocator, cur_state),
             else => unreachable,
         }
     }
@@ -162,7 +163,117 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
     if (ray.IsKeyPressed(ray.KEY_ENTER)) {
         switch (controller_configuration_state.selected_button) {
             .back => try state.controller_configuration_to_main_menu(allocator, cur_state),
-            .add_controller => {},
+            .add_controller => try state.controller_configuration_to_add_controller(allocator, cur_state),
+            else => unreachable,
+        }
+    }
+}
+
+const ButtonEntry = struct {
+    text: [*:0]const u8,
+    binding: fn (state.HumanControllerCandidate) ?c_int,
+    button: state.AddControllerButton,
+};
+fn hc_rl(hc: state.HumanControllerCandidate) ?c_int {
+    return hc.rotate_left;
+}
+fn hc_rr(hc: state.HumanControllerCandidate) ?c_int {
+    return hc.rotate_right;
+}
+fn hc_ml(hc: state.HumanControllerCandidate) ?c_int {
+    return hc.move_left;
+}
+fn hc_mr(hc: state.HumanControllerCandidate) ?c_int {
+    return hc.move_right;
+}
+fn hc_sd(hc: state.HumanControllerCandidate) ?c_int {
+    return hc.soft_drop;
+}
+const data = [_]ButtonEntry{
+    ButtonEntry{ .text = "Rotate Left", .binding = hc_rl, .button = state.AddControllerButton.human_rotate_left },
+    ButtonEntry{ .text = "Rotate Right", .binding = hc_rr, .button = state.AddControllerButton.human_rotate_right },
+    ButtonEntry{ .text = "Move Left", .binding = hc_ml, .button = state.AddControllerButton.human_move_left },
+    ButtonEntry{ .text = "Move Right", .binding = hc_mr, .button = state.AddControllerButton.human_move_right },
+    ButtonEntry{ .text = "Soft Drop", .binding = hc_sd, .button = state.AddControllerButton.human_soft_drop },
+};
+
+pub fn handle_add_controller(allocator: *std.mem.Allocator, cur_state: *state.UIState) !void {
+    const add_controller_state = cur_state.screen.add_controller;
+
+    ray.BeginDrawing();
+
+    ray.ClearBackground(ray.RAYWHITE);
+
+    const cancel_color = if (add_controller_state.selected_button == .cancel) ray.RED else ray.DARKGRAY;
+
+    const cancel_text = "Cancel";
+    const cancel_size = 20;
+    ray.DrawText(cancel_text, 20, 20, cancel_size, cancel_color);
+
+    const keybind_size = 20;
+    const unset_text = "Unset";
+    const unset_width = ray.MeasureText("Unset", keybind_size);
+    switch (add_controller_state.candidate) {
+        .human => |human_candidate| {
+            const human_size = 20;
+            const human_text = "Human";
+            const human_y = 80;
+            const human_offset = @divTrunc(ray.MeasureText(human_text, human_size), 2);
+            ray.DrawText(human_text, @divTrunc(width, 2) - human_offset, human_y, human_size, ray.DARKGRAY);
+
+            const starting_y = 160;
+            const gap = 20;
+            inline for (data) |entry, idx| {
+                const text: [*:0]const u8 = entry.text;
+                const binding: ?c_int = entry.binding(human_candidate);
+                const button: state.AddControllerButton = entry.button;
+
+                const text_y: c_int = @intCast(c_int, starting_y + (gap * idx));
+
+                ray.DrawText(text, @divTrunc(width, 3), text_y, keybind_size, ray.DARKGRAY);
+
+                if (binding != null) {
+                    const key_text = ray.FormatText("%i", binding.?);
+                    const key_width = ray.MeasureText(key_text, keybind_size);
+                    ray.DrawText(key_text, @divTrunc(2 * width, 3) - key_width, text_y, keybind_size, ray.GREEN);
+                } else {
+                    const unused_color = if (add_controller_state.selected_button == button) ray.RED else ray.LIGHTGRAY;
+                    ray.DrawText(unset_text, @divTrunc(2 * width, 3) - unset_width, text_y, keybind_size, unused_color);
+                }
+            }
+        },
+        else => unreachable,
+    }
+
+    ray.EndDrawing();
+
+    if (ray.IsKeyPressed(ray.KEY_UP)) {
+        add_controller_state.selected_button = switch (add_controller_state.selected_button) {
+            .cancel => .cancel,
+            .select_candidate => .cancel,
+            .human_rotate_left => .select_candidate,
+            .human_rotate_right => .human_rotate_left,
+            .human_move_left => .human_rotate_right,
+            .human_move_right => .human_move_left,
+            .human_soft_drop => .human_move_right,
+        };
+    }
+
+    if (ray.IsKeyPressed(ray.KEY_DOWN)) {
+        add_controller_state.selected_button = switch (add_controller_state.selected_button) {
+            .cancel => .select_candidate,
+            .select_candidate => if (add_controller_state.candidate == .human) state.AddControllerButton.human_rotate_left else unreachable,
+            .human_rotate_left => .human_rotate_right,
+            .human_rotate_right => .human_move_left,
+            .human_move_left => .human_move_right,
+            .human_move_right => .human_soft_drop,
+            .human_soft_drop => .human_soft_drop,
+        };
+    }
+
+    if (ray.IsKeyPressed(ray.KEY_ENTER)) {
+        switch (add_controller_state.selected_button) {
+            .cancel => try state.add_controller_to_controller_configuration(allocator, cur_state),
             else => unreachable,
         }
     }
