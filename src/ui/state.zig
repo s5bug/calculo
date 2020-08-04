@@ -4,17 +4,24 @@ const puyo = @import("../puyo/puyo.zig");
 
 pub const UIState = struct {
     screen: UIScreen,
-    controllers: []Controller,
+    controllers: ControllerList,
 };
 
+pub const ControllerList = std.ArrayList(Controller);
+
 pub const Controller = union(enum) {
-    player: *PlayerController,
-    calculo: *CalculoController,
+    player: PlayerController,
+    calculo: CalculoController,
 };
 
 pub const PlayerController = struct {
-    candidate: HumanControllerCandidate,
+    rotate_left: ?c_int,
+    rotate_right: ?c_int,
+    move_left: ?c_int,
+    move_right: ?c_int,
+    soft_drop: ?c_int,
 };
+
 pub const CalculoController = struct {};
 
 pub const UIScreen = union(enum) {
@@ -39,47 +46,28 @@ pub const ControllerConfigurationState = struct {
     selected_button: ControllerConfigurationButton,
 };
 
-pub const ControllerConfigurationButton = enum {
-    back,
-    remove_controller,
-    add_controller,
-    controller_1,
-    controller_2,
-    controller_3,
-    controller_4, // Until Zig better supports tagged unions with optional data, 4 players have to be hardcoded
+pub const ControllerConfigurationButton = union(enum) {
+    back: void,
+    remove_controller: void,
+    add_controller: void,
+    controller: usize,
 };
 
 pub const AddControllerState = struct {
     parent: *ControllerConfigurationState,
     selected_button: AddControllerButton,
-    candidate: ControllerCandidate,
+    candidate: Controller,
 };
 
 pub const AddControllerButton = enum {
     cancel,
+    confirm,
     select_candidate,
-    human_rotate_left,
-    human_rotate_right,
-    human_move_left,
-    human_move_right,
-    human_soft_drop,
-};
-
-pub const ControllerCandidate = union(enum) {
-    human: HumanControllerCandidate,
-    computer: ComputerControllerCandidate,
-};
-
-pub const HumanControllerCandidate = struct {
-    rotate_left: ?c_int,
-    rotate_right: ?c_int,
-    move_left: ?c_int,
-    move_right: ?c_int,
-    soft_drop: ?c_int,
-};
-
-pub const ComputerControllerCandidate = struct {
-    // TODO Calculo weights?
+    player_rotate_left,
+    player_rotate_right,
+    player_move_left,
+    player_move_right,
+    player_soft_drop,
 };
 
 pub const CharacterSelectState = struct {};
@@ -98,7 +86,7 @@ pub fn init_main_menu(alloc: *std.mem.Allocator, state: *UIState) !void {
     new_main_menu.* = MainMenuState{
         .selected_button = .configure_controllers,
     };
-    const no_controllers = try alloc.alloc(Controller, 0);
+    const no_controllers = std.ArrayList(Controller).init(alloc);
     state.* = UIState{
         .screen = UIScreen{ .main_menu = new_main_menu },
         .controllers = no_controllers,
@@ -126,10 +114,10 @@ pub fn controller_configuration_to_add_controller(alloc: *std.mem.Allocator, sta
     new_screen.* = AddControllerState{
         .parent = state.screen.controller_configuration,
         .selected_button = .cancel,
-        .candidate = ControllerCandidate{
-            .human = HumanControllerCandidate{
-                .rotate_left = 0x2c,
-                .rotate_right = 0x2d,
+        .candidate = Controller{
+            .player = PlayerController{
+                .rotate_left = null,
+                .rotate_right = null,
                 .move_left = null,
                 .move_right = null,
                 .soft_drop = null,

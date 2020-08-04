@@ -38,7 +38,7 @@ pub fn run(alloc: *std.mem.Allocator) anyerror!void {
 pub fn handle_main_menu(allocator: *std.mem.Allocator, cur_state: *state.UIState) !void {
     const main_menu_state = cur_state.screen.main_menu;
 
-    const can_go = cur_state.controllers.len > 0;
+    const can_go = cur_state.controllers.items.len > 0;
 
     ray.BeginDrawing();
 
@@ -66,8 +66,9 @@ pub fn handle_main_menu(allocator: *std.mem.Allocator, cur_state: *state.UIState
     ray.EndDrawing();
 
     if (ray.IsKeyPressed(ray.KEY_ENTER)) {
-        if (main_menu_state.selected_button == .configure_controllers) {
-            try state.main_menu_to_controller_configuration(allocator, cur_state);
+        switch (main_menu_state.selected_button) {
+            .go => unreachable,
+            .configure_controllers => try state.main_menu_to_controller_configuration(allocator, cur_state),
         }
     }
     if (ray.IsKeyPressed(ray.KEY_UP)) {
@@ -87,8 +88,10 @@ pub fn handle_main_menu(allocator: *std.mem.Allocator, cur_state: *state.UIState
 pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state: *state.UIState) !void {
     const controller_configuration_state = cur_state.screen.controller_configuration;
 
-    const can_add = cur_state.controllers.len < 4;
-    const can_remove = cur_state.controllers.len > 0;
+    const num_controllers = cur_state.controllers.items.len;
+
+    const can_add = num_controllers < 4;
+    const can_remove = num_controllers > 0;
 
     ray.BeginDrawing();
 
@@ -116,6 +119,25 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
     const add_offset = @divTrunc(ray.MeasureText(add_text, add_size), 2);
     ray.DrawText(add_text, @divTrunc(2 * width, 3) - add_offset, add_remove_y, add_size, add_color);
 
+    const starting_y = 160;
+    const gap = 20;
+    for (cur_state.controllers.items) |ctrl, idx| {
+        const controller_color = switch (controller_configuration_state.selected_button) {
+            .controller => |i| if (i == idx) ray.RED else ray.DARKGRAY,
+            else => ray.DARKGRAY,
+        };
+
+        const controller_size = 20;
+        const controller_name: [*:0]const u8 = switch (ctrl) {
+            .player => "Player",
+            .calculo => "Calculo",
+        };
+        const controller_text = ray.FormatText("%i: %s", idx + 1, controller_name);
+        const controller_offset = @divTrunc(ray.MeasureText(controller_text, controller_size), 2);
+        const controller_y = @intCast(c_int, starting_y + (gap * idx));
+        ray.DrawText(controller_text, @divTrunc(width, 2) - controller_offset, controller_y, controller_size, controller_color);
+    }
+
     ray.EndDrawing();
 
     if (ray.IsKeyPressed(ray.KEY_LEFT) and
@@ -136,21 +158,15 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
         controller_configuration_state.selected_button = switch (controller_configuration_state.selected_button) {
             .remove_controller, .add_controller => .back,
             .back => .back,
-            .controller_1 => if (can_add) state.ControllerConfigurationButton.add_controller else state.ControllerConfigurationButton.remove_controller,
-            .controller_2 => .controller_1,
-            .controller_3 => .controller_2,
-            .controller_4 => .controller_3,
+            .controller => |cnum| if (cnum == 0) state.ControllerConfigurationButton{ .add_controller = {} } else state.ControllerConfigurationButton{ .controller = cnum - 1 },
         };
     }
     if (ray.IsKeyPressed(ray.KEY_DOWN)) {
         controller_configuration_state.selected_button = switch (controller_configuration_state.selected_button) {
-            .back => if (can_add) state.ControllerConfigurationButton.add_controller else state.ControllerConfigurationButton.remove_controller,
-            .remove_controller => if (cur_state.controllers.len > 0) state.ControllerConfigurationButton.controller_1 else state.ControllerConfigurationButton.remove_controller,
-            .add_controller => if (cur_state.controllers.len > 0) state.ControllerConfigurationButton.controller_1 else state.ControllerConfigurationButton.add_controller,
-            .controller_1 => if (cur_state.controllers.len > 1) state.ControllerConfigurationButton.controller_2 else state.ControllerConfigurationButton.controller_1,
-            .controller_2 => if (cur_state.controllers.len > 2) state.ControllerConfigurationButton.controller_3 else state.ControllerConfigurationButton.controller_2,
-            .controller_3 => if (cur_state.controllers.len > 3) state.ControllerConfigurationButton.controller_4 else state.ControllerConfigurationButton.controller_3,
-            .controller_4 => .controller_4,
+            .back => if (can_add) state.ControllerConfigurationButton{ .add_controller = {} } else state.ControllerConfigurationButton{ .remove_controller = {} },
+            .remove_controller => if (num_controllers > 0) state.ControllerConfigurationButton{ .controller = 0 } else state.ControllerConfigurationButton{ .remove_controller = {} },
+            .add_controller => if (num_controllers > 0) state.ControllerConfigurationButton{ .controller = 0 } else state.ControllerConfigurationButton{ .add_controller = {} },
+            .controller => |cnum| if (num_controllers > (cnum + 1)) state.ControllerConfigurationButton{ .controller = cnum + 1 } else state.ControllerConfigurationButton{ .controller = cnum },
         };
     }
     if (ray.IsKeyPressed(ray.KEY_LEFT) and controller_configuration_state.selected_button == .add_controller and can_remove) {
@@ -164,6 +180,14 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
         switch (controller_configuration_state.selected_button) {
             .back => try state.controller_configuration_to_main_menu(allocator, cur_state),
             .add_controller => try state.controller_configuration_to_add_controller(allocator, cur_state),
+            .remove_controller => {
+                if (num_controllers > 0) {
+                    if (num_controllers == 1) {
+                        controller_configuration_state.selected_button = .add_controller;
+                    }
+                    _ = cur_state.controllers.orderedRemove(num_controllers - 1);
+                } else unreachable;
+            },
             else => unreachable,
         }
     }
@@ -171,30 +195,30 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
 
 const ButtonEntry = struct {
     text: [*:0]const u8,
-    binding: fn (state.HumanControllerCandidate) ?c_int,
+    binding: fn (state.PlayerController) ?c_int,
     button: state.AddControllerButton,
 };
-fn hc_rl(hc: state.HumanControllerCandidate) ?c_int {
-    return hc.rotate_left;
+fn hc_rl(pc: state.PlayerController) ?c_int {
+    return pc.rotate_left;
 }
-fn hc_rr(hc: state.HumanControllerCandidate) ?c_int {
-    return hc.rotate_right;
+fn hc_rr(pc: state.PlayerController) ?c_int {
+    return pc.rotate_right;
 }
-fn hc_ml(hc: state.HumanControllerCandidate) ?c_int {
-    return hc.move_left;
+fn hc_ml(pc: state.PlayerController) ?c_int {
+    return pc.move_left;
 }
-fn hc_mr(hc: state.HumanControllerCandidate) ?c_int {
-    return hc.move_right;
+fn hc_mr(pc: state.PlayerController) ?c_int {
+    return pc.move_right;
 }
-fn hc_sd(hc: state.HumanControllerCandidate) ?c_int {
-    return hc.soft_drop;
+fn hc_sd(pc: state.PlayerController) ?c_int {
+    return pc.soft_drop;
 }
 const data = [_]ButtonEntry{
-    ButtonEntry{ .text = "Rotate Left", .binding = hc_rl, .button = state.AddControllerButton.human_rotate_left },
-    ButtonEntry{ .text = "Rotate Right", .binding = hc_rr, .button = state.AddControllerButton.human_rotate_right },
-    ButtonEntry{ .text = "Move Left", .binding = hc_ml, .button = state.AddControllerButton.human_move_left },
-    ButtonEntry{ .text = "Move Right", .binding = hc_mr, .button = state.AddControllerButton.human_move_right },
-    ButtonEntry{ .text = "Soft Drop", .binding = hc_sd, .button = state.AddControllerButton.human_soft_drop },
+    ButtonEntry{ .text = "Rotate Left", .binding = hc_rl, .button = state.AddControllerButton.player_rotate_left },
+    ButtonEntry{ .text = "Rotate Right", .binding = hc_rr, .button = state.AddControllerButton.player_rotate_right },
+    ButtonEntry{ .text = "Move Left", .binding = hc_ml, .button = state.AddControllerButton.player_move_left },
+    ButtonEntry{ .text = "Move Right", .binding = hc_mr, .button = state.AddControllerButton.player_move_right },
+    ButtonEntry{ .text = "Soft Drop", .binding = hc_sd, .button = state.AddControllerButton.player_soft_drop },
 };
 
 pub fn handle_add_controller(allocator: *std.mem.Allocator, cur_state: *state.UIState) !void {
@@ -214,18 +238,20 @@ pub fn handle_add_controller(allocator: *std.mem.Allocator, cur_state: *state.UI
     const unset_text = "Unset";
     const unset_width = ray.MeasureText("Unset", keybind_size);
     switch (add_controller_state.candidate) {
-        .human => |human_candidate| {
-            const human_size = 20;
-            const human_text = "Human";
-            const human_y = 80;
-            const human_offset = @divTrunc(ray.MeasureText(human_text, human_size), 2);
-            ray.DrawText(human_text, @divTrunc(width, 2) - human_offset, human_y, human_size, ray.DARKGRAY);
+        .player => |player_candidate| {
+            const player_color = if (add_controller_state.selected_button == .select_candidate) ray.RED else ray.DARKGRAY;
+
+            const player_size = 20;
+            const player_text = "Player";
+            const player_y = 80;
+            const player_offset = @divTrunc(ray.MeasureText(player_text, player_size), 2);
+            ray.DrawText(player_text, @divTrunc(width, 2) - player_offset, player_y, player_size, player_color);
 
             const starting_y = 160;
             const gap = 20;
             inline for (data) |entry, idx| {
                 const text: [*:0]const u8 = entry.text;
-                const binding: ?c_int = entry.binding(human_candidate);
+                const binding: ?c_int = entry.binding(player_candidate);
                 const button: state.AddControllerButton = entry.button;
 
                 const text_y: c_int = @intCast(c_int, starting_y + (gap * idx));
@@ -242,8 +268,24 @@ pub fn handle_add_controller(allocator: *std.mem.Allocator, cur_state: *state.UI
                 }
             }
         },
-        else => unreachable,
+        .calculo => |calculo_candidate| {
+            const calculo_color = if (add_controller_state.selected_button == .select_candidate) ray.RED else ray.DARKGRAY;
+
+            const calculo_size = 20;
+            const calculo_text = "Calculo";
+            const calculo_y = 80;
+            const calculo_offset = @divTrunc(ray.MeasureText(calculo_text, calculo_size), 2);
+            ray.DrawText(calculo_text, @divTrunc(width, 2) - calculo_offset, calculo_y, calculo_size, calculo_color);
+        },
     }
+
+    const confirm_color = if (add_controller_state.selected_button == .confirm) ray.RED else ray.DARKGRAY;
+
+    const confirm_size = 20;
+    const confirm_text = "Confirm";
+    const confirm_y = 400;
+    const confirm_offset = @divTrunc(ray.MeasureText(confirm_text, confirm_size), 2);
+    ray.DrawText(confirm_text, @divTrunc(width, 2) - confirm_offset, confirm_y, confirm_size, confirm_color);
 
     ray.EndDrawing();
 
@@ -251,29 +293,51 @@ pub fn handle_add_controller(allocator: *std.mem.Allocator, cur_state: *state.UI
         add_controller_state.selected_button = switch (add_controller_state.selected_button) {
             .cancel => .cancel,
             .select_candidate => .cancel,
-            .human_rotate_left => .select_candidate,
-            .human_rotate_right => .human_rotate_left,
-            .human_move_left => .human_rotate_right,
-            .human_move_right => .human_move_left,
-            .human_soft_drop => .human_move_right,
+            .player_rotate_left => .select_candidate,
+            .player_rotate_right => .player_rotate_left,
+            .player_move_left => .player_rotate_right,
+            .player_move_right => .player_move_left,
+            .player_soft_drop => .player_move_right,
+            .confirm => if (add_controller_state.candidate == .player) state.AddControllerButton.player_soft_drop else state.AddControllerButton.select_candidate,
         };
     }
 
     if (ray.IsKeyPressed(ray.KEY_DOWN)) {
         add_controller_state.selected_button = switch (add_controller_state.selected_button) {
             .cancel => .select_candidate,
-            .select_candidate => if (add_controller_state.candidate == .human) state.AddControllerButton.human_rotate_left else unreachable,
-            .human_rotate_left => .human_rotate_right,
-            .human_rotate_right => .human_move_left,
-            .human_move_left => .human_move_right,
-            .human_move_right => .human_soft_drop,
-            .human_soft_drop => .human_soft_drop,
+            .select_candidate => if (add_controller_state.candidate == .player) state.AddControllerButton.player_rotate_left else .confirm,
+            .player_rotate_left => .player_rotate_right,
+            .player_rotate_right => .player_move_left,
+            .player_move_left => .player_move_right,
+            .player_move_right => .player_soft_drop,
+            .player_soft_drop => .confirm,
+            .confirm => .confirm,
         };
     }
 
     if (ray.IsKeyPressed(ray.KEY_ENTER)) {
         switch (add_controller_state.selected_button) {
             .cancel => try state.add_controller_to_controller_configuration(allocator, cur_state),
+            .select_candidate => {
+                add_controller_state.candidate = switch (add_controller_state.candidate) {
+                    .player => state.Controller{
+                        .calculo = state.CalculoController{},
+                    },
+                    .calculo => state.Controller{
+                        .player = state.PlayerController{
+                            .rotate_left = null,
+                            .rotate_right = null,
+                            .move_left = null,
+                            .move_right = null,
+                            .soft_drop = null,
+                        },
+                    },
+                };
+            },
+            .confirm => {
+                try cur_state.controllers.append(add_controller_state.candidate);
+                try state.add_controller_to_controller_configuration(allocator, cur_state);
+            },
             else => unreachable,
         }
     }
