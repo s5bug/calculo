@@ -48,9 +48,8 @@ pub const ControllerConfigurationState = struct {
 
 pub const ControllerConfigurationButton = union(enum) {
     back: void,
-    remove_controller: void,
-    add_controller: void,
     controller: usize,
+    add_controller: void,
 };
 
 pub const AddControllerState = struct {

@@ -90,9 +90,6 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
 
     const num_controllers = cur_state.controllers.items.len;
 
-    const can_add = num_controllers < 4;
-    const can_remove = num_controllers > 0;
-
     ray.BeginDrawing();
 
     ray.ClearBackground(ray.RAYWHITE);
@@ -103,23 +100,7 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
     const back_size = 20;
     ray.DrawText(back_text, 20, 20, back_size, back_color);
 
-    const add_remove_y = 80;
-
-    const remove_color = if (controller_configuration_state.selected_button == .remove_controller) ray.RED else if (!can_remove) ray.GRAY else ray.DARKGRAY;
-
-    const remove_text = "Remove";
-    const remove_size = 20;
-    const remove_offset = @divTrunc(ray.MeasureText(remove_text, remove_size), 2);
-    ray.DrawText(remove_text, @divTrunc(width, 3) - remove_offset, add_remove_y, remove_size, remove_color);
-
-    const add_color = if (controller_configuration_state.selected_button == .add_controller) ray.RED else if (!can_add) ray.GRAY else ray.DARKGRAY;
-
-    const add_text = "Add";
-    const add_size = 20;
-    const add_offset = @divTrunc(ray.MeasureText(add_text, add_size), 2);
-    ray.DrawText(add_text, @divTrunc(2 * width, 3) - add_offset, add_remove_y, add_size, add_color);
-
-    const starting_y = 160;
+    const starting_y = 80;
     const gap = 20;
     for (cur_state.controllers.items) |ctrl, idx| {
         const controller_color = switch (controller_configuration_state.selected_button) {
@@ -133,62 +114,53 @@ pub fn handle_controller_configuration(allocator: *std.mem.Allocator, cur_state:
             .calculo => "Calculo",
         };
         const controller_text = ray.FormatText("%i: %s", idx + 1, controller_name);
-        const controller_offset = @divTrunc(ray.MeasureText(controller_text, controller_size), 2);
         const controller_y = @intCast(c_int, starting_y + (gap * idx));
+        const controller_offset = @divTrunc(ray.MeasureText(controller_text, controller_size), 2);
         ray.DrawText(controller_text, @divTrunc(width, 2) - controller_offset, controller_y, controller_size, controller_color);
     }
 
+    const add_color = if (controller_configuration_state.selected_button == .add_controller) ray.RED else ray.DARKGRAY;
+
+    const add_text = "Add";
+    const add_size = 20;
+    const add_y = @intCast(c_int, starting_y + (gap * num_controllers));
+    const add_offset = @divTrunc(ray.MeasureText(add_text, add_size), 2);
+    ray.DrawText(add_text, @divTrunc(width, 2) - add_offset, add_y, add_size, add_color);
+
     ray.EndDrawing();
-
-    if (ray.IsKeyPressed(ray.KEY_LEFT) and
-        controller_configuration_state.selected_button == .add_controller and
-        can_remove)
-    {
-        controller_configuration_state.selected_button = .remove_controller;
-    }
-
-    if (ray.IsKeyPressed(ray.KEY_RIGHT) and
-        controller_configuration_state.selected_button == .remove_controller and
-        can_add)
-    {
-        controller_configuration_state.selected_button = .add_controller;
-    }
 
     if (ray.IsKeyPressed(ray.KEY_UP)) {
         controller_configuration_state.selected_button = switch (controller_configuration_state.selected_button) {
-            .remove_controller, .add_controller => .back,
             .back => .back,
-            .controller => |cnum| if (cnum == 0) state.ControllerConfigurationButton{ .add_controller = {} } else state.ControllerConfigurationButton{ .controller = cnum - 1 },
+            .controller => |cnum| if (cnum == 0) state.ControllerConfigurationButton{ .back = {} } else state.ControllerConfigurationButton{ .controller = cnum - 1 },
+            .add_controller => if (num_controllers > 0) state.ControllerConfigurationButton{ .controller = num_controllers - 1 } else state.ControllerConfigurationButton{ .back = {} },
         };
     }
     if (ray.IsKeyPressed(ray.KEY_DOWN)) {
         controller_configuration_state.selected_button = switch (controller_configuration_state.selected_button) {
-            .back => if (can_add) state.ControllerConfigurationButton{ .add_controller = {} } else state.ControllerConfigurationButton{ .remove_controller = {} },
-            .remove_controller => if (num_controllers > 0) state.ControllerConfigurationButton{ .controller = 0 } else state.ControllerConfigurationButton{ .remove_controller = {} },
-            .add_controller => if (num_controllers > 0) state.ControllerConfigurationButton{ .controller = 0 } else state.ControllerConfigurationButton{ .add_controller = {} },
-            .controller => |cnum| if (num_controllers > (cnum + 1)) state.ControllerConfigurationButton{ .controller = cnum + 1 } else state.ControllerConfigurationButton{ .controller = cnum },
+            .back => if (num_controllers > 0) state.ControllerConfigurationButton{ .controller = 0 } else state.ControllerConfigurationButton{ .add_controller = {} },
+            .controller => |cnum| if (num_controllers > (cnum + 1)) state.ControllerConfigurationButton{ .controller = cnum + 1 } else state.ControllerConfigurationButton{ .add_controller = {} },
+            .add_controller => .add_controller,
         };
-    }
-    if (ray.IsKeyPressed(ray.KEY_LEFT) and controller_configuration_state.selected_button == .add_controller and can_remove) {
-        controller_configuration_state.selected_button = .remove_controller;
-    }
-    if (ray.IsKeyPressed(ray.KEY_RIGHT) and controller_configuration_state.selected_button == .remove_controller and can_add) {
-        controller_configuration_state.selected_button = .add_controller;
     }
 
     if (ray.IsKeyPressed(ray.KEY_ENTER)) {
         switch (controller_configuration_state.selected_button) {
             .back => try state.controller_configuration_to_main_menu(allocator, cur_state),
             .add_controller => try state.controller_configuration_to_add_controller(allocator, cur_state),
-            .remove_controller => {
-                if (num_controllers > 0) {
-                    if (num_controllers == 1) {
-                        controller_configuration_state.selected_button = .add_controller;
-                    }
-                    _ = cur_state.controllers.orderedRemove(num_controllers - 1);
-                } else unreachable;
-            },
             else => unreachable,
+        }
+    }
+
+    if (ray.IsKeyPressed(ray.KEY_DELETE)) {
+        switch (controller_configuration_state.selected_button) {
+            .controller => |cnum| {
+                if (cnum == num_controllers - 1) {
+                    controller_configuration_state.selected_button = .add_controller;
+                }
+                _ = cur_state.controllers.orderedRemove(cnum);
+            },
+            else => {},
         }
     }
 }
