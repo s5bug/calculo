@@ -1,4 +1,5 @@
-const Builder = @import("std").build.Builder;
+const std = @import("std");
+const Builder = std.build.Builder;
 
 pub fn build(b: *Builder) void {
     // Standard target options allows the person running `zig build` to choose
@@ -15,12 +16,15 @@ pub fn build(b: *Builder) void {
     exe.setTarget(target);
     exe.setBuildMode(mode);
 
+    exe.c_std = .C99;
+    exe.addIncludeDir("include");
+
     exe.linkSystemLibrary("c");
     exe.linkSystemLibrary("opencl");
     exe.linkSystemLibrary("raylib");
 
     exe.addIncludeDir("src/algae");
-    exe.addCSourceFile("src/algae/algae.c", &[_][]const u8{"-std=c99"});
+    exe.addCSourceFile("src/algae/algae.c", &[_][]const u8{});
     const fut = b.addSystemCommand(&[_][]const u8{ "futhark", "opencl", "--library", "src/algae/algae.fut" });
     exe.step.dependOn(&fut.step);
 
