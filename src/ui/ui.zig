@@ -67,7 +67,9 @@ pub fn handle_main_menu(allocator: *std.mem.Allocator, cur_state: *state.UIState
 
     if (ray.IsKeyPressed(ray.KEY_ENTER)) {
         switch (main_menu_state.selected_button) {
-            .go => unreachable,
+            .go => {
+                // TODO
+            },
             .configure_controllers => try state.main_menu_to_controller_configuration(allocator, cur_state),
         }
     }
@@ -310,7 +312,10 @@ pub fn handle_add_controller(allocator: *std.mem.Allocator, cur_state: *state.UI
                 try cur_state.controllers.append(add_controller_state.candidate);
                 try state.add_controller_to_controller_configuration(allocator, cur_state);
             },
-            else => unreachable,
+            .player_rotate_left, .player_rotate_right, .player_move_left, .player_move_right, .player_soft_drop => {
+                // TODO
+            },
+            // else => unreachable,
         }
     }
 }
