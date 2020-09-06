@@ -19,7 +19,17 @@ pub fn build(b: *Builder) void {
     exe.c_std = .C99;
     exe.addIncludeDir("include");
 
-    exe.linkSystemLibrary("c");
+    const target_triple_str = target.linuxTriple(b.allocator) catch |err| {
+        std.debug.warn("{} error while trying to stringify the target triple", .{err});
+        std.os.exit(1);
+    };
+    const lib_dir = std.fs.path.join(b.allocator, &[_][]const u8{ "lib", target_triple_str }) catch |err| {
+        std.debug.warn("{} error while trying to render library path", .{err});
+        std.os.exit(1);
+    };
+    exe.addLibPath(lib_dir);
+
+    exe.linkLibC();
     exe.linkSystemLibrary("opencl");
     exe.linkSystemLibrary("raylib");
 
