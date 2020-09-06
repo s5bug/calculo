@@ -9,15 +9,21 @@ jobs:
         os: [ubuntu-latest] # [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{matrix.os}}
     steps:
-      - uses: actions/checkout@v2.3.2
-      - uses: mstksg/setup-stack@v2
-      - run: |
-          git clone https://github.com/diku-dk/futhark.git
+      - name: Checkout Repository
+        uses: actions/checkout@v2.3.2
+      - name: Setup Stack
+        uses: mstksg/setup-stack@v2
+      - name: Clone Futhark
+        run: git clone https://github.com/diku-dk/futhark.git
+      - name: Build Futhark
+        run: |
           cd futhark
           stack setup
           stack build
           stack install
-      - uses: goto-bus-stop/setup-zig@v1.2.3
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v1.2.3
         with:
           version: master
-      - run: zig build
+      - name: Build Calculo
+        run: zig build
