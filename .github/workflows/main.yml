@@ -11,22 +11,12 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y haskell-stack ocl-icd-opencl-dev
-      - uses: actions/cache@v2
-        name: Cache ~/.stack and .stack-work
-        with:
-          path: |
-            ~/.stack
-            .stack-work
-          key: ${{ runner.os }}-stack
-      - name: Clone Futhark
-        run: git clone https://github.com/diku-dk/futhark.git
-      - name: Build Futhark
+          sudo apt install -y ocl-icd-opencl-dev
+      - name: Install Futhark
         run: |
-          cd futhark
-          stack setup
-          stack build
-          stack install
+          wget https://futhark-lang.org/releases/futhark-nightly-linux-x86_64.tar.xz
+          tar xvf futhark-nightly-linux-x86_64.tar.xz
+          echo "::add-path::${{env.working-directory}}/futhark-nightly-linux-x86_64/bin"
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v1.2.3
         with:
@@ -41,21 +31,9 @@ jobs:
       - name: Install Dependencies
         run: |
           brew install haskell-stack
-      - uses: actions/cache@v2
-        name: Cache ~/.stack and .stack-work
-        with:
-          path: |
-            ~/.stack
-            .stack-work
-          key: ${{ runner.os }}-stack
-      - name: Clone Futhark
-        run: git clone https://github.com/diku-dk/futhark.git
-      - name: Build Futhark
+      - name: Install Futhark
         run: |
-          cd futhark
-          stack setup
-          stack build
-          stack install
+          brew install futhark
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v1.2.3
         with:
@@ -67,25 +45,13 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2.3.2
-      - name: Install Dependencies
+      - name: Install Futhark
+        shell: powershell
         run: |
-          choco install -y haskell-stack
-      - uses: actions/cache@v2
-        name: Cache ~/.stack and .stack-work
-        with:
-          path: |
-            ~/AppData/Roaming/stack
-            .stack-work
-          key: ${{ runner.os }}-stack
-      - name: Clone Futhark
-        run: git clone https://github.com/diku-dk/futhark.git
-      - name: Build Futhark
-        shell: bash
-        run: |
-          cd futhark
-          stack setup
-          stack build
-          stack install
+          Import-Module BitsTransfer
+          Start-BitsTransfer -Source "https://futhark-lang.org/releases/futhark-nightly-windows-x86_64.zip" -Destination "futhark-nightly-windows-x86_64.zip"
+          Expand-Archive futhark-nightly-windows-x86_64.zip
+          Write-Output "::add-path::${{env.working-directory}}/futhark-nightly-windows-x86_64"
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v1.2.3
         with:
