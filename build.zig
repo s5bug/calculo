@@ -38,7 +38,7 @@ pub fn build(b: *Builder) void {
     exe.rdynamic = true;
 
     exe.addIncludeDir("src/algae");
-    exe.addCSourceFile("src/algae/algae.c", &[_][]const u8{});
+    exe.addCSourceFile("src/algae/algae.c", &[_][]const u8{"-framework", "OpenCL"});
     const fut = b.addSystemCommand(&[_][]const u8{ "futhark", "opencl", "--library", "src/algae/algae.fut" });
     exe.step.dependOn(&fut.step);
 

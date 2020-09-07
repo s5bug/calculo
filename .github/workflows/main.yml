@@ -26,7 +26,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: calculo
+          name: x86_64-linux-gnu-calculo
           path: |
             zig-cache/bin/calculo
   build-mac:
@@ -46,7 +46,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: calculo
+          name: x86_64-macosx-gnu-calculo
           path: |
             zig-cache/bin/calculo
   build-windows:
@@ -70,6 +70,6 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: calculo
+          name: x86_64-windows-gnu-calculo.exe
           path: |
             zig-cache/bin/calculo.exe
