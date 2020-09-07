@@ -12,10 +12,16 @@ debug build in the [Main GitHub Action](https://github.com/sorenbug/calculo/acti
 ### "raylib not found"
 
 You will need to point your Operating System to Raylib. If your OS has some
-package manager with a `raylib` package, that should suffice. Otherwise,
-download the appropriate archive from
+package manager with a `raylib` package, that should suffice.
+
+#### without a package manager
+
+Otherwise, download the appropriate archive from
 [Raylib's latest release](https://github.com/raysan5/raylib/releases/latest)
-according to your OS.
+according to your OS. Common architectures:
+- Windows x64: `raylib-{version}-Win64-msvc15.zip`
+- Mac OS x86_64: `raylib-{version}-macOS.tar.gz`
+- Linux x86_64: `raylib-{version}-Linux-amd64.tar.gz`
 
 If on Windows, you'll need the `msvc` variant of Raylib, not the `mingw`
 variant. All you need to do then is place `raylib.dll` in the same directory
