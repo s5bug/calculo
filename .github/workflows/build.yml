@@ -9,6 +9,7 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{matrix.os}}
     steps:
+      - uses: uses: actions/checkout@v2.3.2
       - uses: goto-bus-stop/setup-zig@v1.2.3
         with:
           version: master
