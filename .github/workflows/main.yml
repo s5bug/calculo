@@ -8,7 +8,7 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2.3.2
-      - name: Install Dependencies
+      - name: Install ocl-icd
         run: |
           sudo apt update
           sudo apt install -y ocl-icd-opencl-dev
@@ -16,7 +16,7 @@ jobs:
         run: |
           wget https://futhark-lang.org/releases/futhark-nightly-linux-x86_64.tar.xz
           tar xvf futhark-nightly-linux-x86_64.tar.xz
-          echo "::add-path::${{env.working-directory}}/futhark-nightly-linux-x86_64/bin"
+          echo "::add-path::${PWD}/futhark-nightly-linux-x86_64/bin"
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v1.2.3
         with:
@@ -28,9 +28,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2.3.2
-      - name: Install Dependencies
-        run: |
-          brew install haskell-stack
       - name: Install Futhark
         run: |
           brew install futhark
@@ -51,7 +48,7 @@ jobs:
           Import-Module BitsTransfer
           Start-BitsTransfer -Source "https://futhark-lang.org/releases/futhark-nightly-windows-x86_64.zip" -Destination "futhark-nightly-windows-x86_64.zip"
           Expand-Archive futhark-nightly-windows-x86_64.zip
-          Write-Output "::add-path::${{env.working-directory}}/futhark-nightly-windows-x86_64"
+          Write-Output "::add-path::$(Get-Location)/futhark-nightly-windows-x86_64"
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v1.2.3
         with:

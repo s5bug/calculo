@@ -29,6 +29,8 @@ pub fn build(b: *Builder) void {
     };
     exe.addLibPath(lib_dir);
 
+    if(target.isDarwin()) exe.linkFramework("OpenCL");
+
     exe.linkLibC();
     exe.linkSystemLibrary("opencl");
     exe.linkSystemLibrary("raylib");
