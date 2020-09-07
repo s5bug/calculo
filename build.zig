@@ -28,17 +28,18 @@ pub fn build(b: *Builder) void {
         std.os.exit(1);
     };
     exe.addLibPath(lib_dir);
+    
+    exe.linkLibC();
+    exe.linkSystemLibrary("raylib");
 
     if(target.isDarwin()) {
         exe.addFrameworkDir("/Library/Frameworks");
         exe.addFrameworkDir("~/Library/Frameworks");
         exe.addFrameworkDir("/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks");
         exe.linkFramework("OpenCL");
+    } else {
+        exe.linkSystemLibrary("opencl");
     }
-
-    exe.linkLibC();
-    exe.linkSystemLibrary("opencl");
-    exe.linkSystemLibrary("raylib");
     
     exe.rdynamic = true;
 
