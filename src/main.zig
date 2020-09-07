@@ -5,9 +5,7 @@ const puyo = @import("puyo/puyo.zig");
 const state = @import("calculo/state.zig");
 const provider = @import("calculo/provider.zig");
 
-const algae = @cImport({
-    @cInclude("algae.h");
-});
+const algae = @import("algae/algae.zig");
 
 const TestProvider = struct {
     lstate: state.GameState = state.GameState{
@@ -42,6 +40,23 @@ const TestProvider = struct {
 };
 
 pub fn main() anyerror!void {
+    const cfg = try algae.FutConfig.init();
+    defer cfg.deinit();
+    const ctx = try algae.FutContext.init(cfg);
+    defer ctx.deinit();
+
+    var board_data: [2][2]u8 = [_][2]u8 {
+        [_]u8 { 0, 1 },
+        [_]u8 { 2, 3 },
+    };
+
+    const arr = try algae.FutU82D.init(ctx, &board_data);
+    defer arr.deinit();
+
+    var out: f64 = 0.0;
+    _ = algae.main(ctx, &out, arr);
+
+    std.log.crit("Result: {}", .{ out });
     // var tprovider = TestProvider{};
     // provider.do_thing(tprovider);
     try @import("ui/ui.zig").run(std.heap.c_allocator);

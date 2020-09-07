@@ -1,24 +1,15 @@
 type tile = #empty | #nuisance | #puyo u8
 
--- let search [t] [n] 'a 's 'm (transitions: s -> a -> [t](s, m)) (heuristic: s -> f32) (resolve_dispute: (f32, [](s, m)) -> (f32, [](s, m)) -> (f32, [](s, m))) (known: [n]a) (current: s) : (f32, [](s, m)) =
---   let my_score = heuristic current
---   in
---     if null known then
---       (my_score, [])
---     else
---       let from_here: [t](s, m) = transitions current (head known)
---       let sub_search (candidate: (s, m)): (f32, [](s, m)) =
---         let (next_state, move) = candidate
---         let (res, tail) = search transitions heuristic (tail known) next_state
---         in (res, concat [(next_state, move)] tail)
---       let children: [t](f32, [](s, m)) = map sub_search from_here
---       let by_first (first : (f32, [](s, m))) (second : (f32, [](s, m))) : (f32, [](s, m)) =
---         let (first_score, x) = first
---         let (second_score, y) = second
---         in if first_score > second_score then first else if second_score > first_score then second else resolve_dispute first second
---       in reduce_comm by_first (my_score, []) children
+type game_state [n] [m] = {
+  board: [n][m]tile
+}
 
-let deserialize_board (in_board: [][]u8): [][]tile =
+type node [n] [m] = {
+  score: f64,
+  target_state: game_state [n] [m]
+}
+
+let deserialize_board [n] [m] (in_board: [n][m]u8): [n][m]tile =
   let f (x : u8) : tile =
     match x & 0b11
       case 0 -> #empty
@@ -26,5 +17,23 @@ let deserialize_board (in_board: [][]u8): [][]tile =
       case _ -> #puyo (x >> 2)
   in map (map f) in_board
 
-let main (in_board: [][]u8) =
-  ((deserialize_board(in_board))[0])[0] == #puyo 0
+let heuristic [n] [m] (state: game_state [n] [m]): f64 =
+  let {board} = state
+  let score (x: tile) : f64 =
+    match x
+      case #empty -> 0.0
+      case #nuisance -> -1.0
+      case #puyo _ -> 1.0
+  let cell_score = map (map score) board
+  let total_score = reduce_comm (+) 0 (map (reduce_comm (+) 0) cell_score)
+  in total_score
+
+let search 'a (f: a -> f64) (x: a): f64 =
+  f x
+
+let main [n] [m] (in_board: [n][m]u8) =
+  let deserialized = deserialize_board in_board
+  let cur_state: game_state [n] [m] = {
+    board = deserialized
+  }
+  in search heuristic cur_state
