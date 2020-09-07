@@ -45,7 +45,7 @@ pub fn main() anyerror!void {
     const ctx = try algae.FutContext.init(cfg);
     defer ctx.deinit();
 
-    var board_data: [2][2]u8 = [_][2]u8 {
+    const board_data: [2][2]u8 = [_][2]u8 {
         [_]u8 { 0, 1 },
         [_]u8 { 2, 3 },
     };

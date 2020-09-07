@@ -63,7 +63,7 @@ pub const FutU82D = struct {
         const dim0 = @typeInfo(A).Array.len;
         const dim1 = @typeInfo(B).Array.len;
 
-        var ptr_opt: ?*fut.futhark_u8_2d = fut.futhark_new_u8_2d(ctx.ptr, @ptrCast([*]u8, data), dim0, dim1);
+        var ptr_opt: ?*fut.futhark_u8_2d = fut.futhark_new_u8_2d(ctx.ptr, @ptrCast([*]const u8, data), dim0, dim1);
         if(ptr_opt) |ptr| {
             return FutU82D {
                 .ctx = ctx,
