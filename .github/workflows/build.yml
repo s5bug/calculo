@@ -1,0 +1,14 @@
+name: Build
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{matrix.os}}
+    steps:
+      - uses: goto-bus-stop/setup-zig@v1.2.3
+        with:
+          version: master
