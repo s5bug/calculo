@@ -32,6 +32,7 @@ pub fn build(b: *Builder) void {
     if(target.isDarwin()) {
         exe.addFrameworkDir("/Library/Frameworks");
         exe.addFrameworkDir("~/Library/Frameworks");
+        exe.addFrameworkDir("/Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk/System/Library/Frameworks");
         exe.linkFramework("OpenCL");
     }
 
