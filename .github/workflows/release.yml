@@ -1,6 +1,6 @@
 name: Main
 
-on: [push, pull_request]
+on: [workflow_dispatch, release]
 
 jobs:
   build-linux:
@@ -22,7 +22,7 @@ jobs:
         with:
           version: master
       - name: Build Calculo
-        run: zig build
+        run: zig build -Drelease-fast=true
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -42,7 +42,7 @@ jobs:
         with:
           version: master
       - name: Build Calculo
-        run: zig build
+        run: zig build -Drelease-fast=true
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -66,7 +66,7 @@ jobs:
         with:
           version: master
       - name: Build Calculo
-        run: zig build
+        run: zig build -Drelease-fast=true
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
