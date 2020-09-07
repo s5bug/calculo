@@ -70,6 +70,6 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: x86_64-windows-gnu-calculo.exe
+          name: x86_64-windows-msvc-calculo.exe
           path: |
             zig-cache/bin/calculo.exe
