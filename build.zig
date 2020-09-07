@@ -29,7 +29,11 @@ pub fn build(b: *Builder) void {
     };
     exe.addLibPath(lib_dir);
 
-    if(target.isDarwin()) exe.linkFramework("OpenCL");
+    if(target.isDarwin()) {
+        exe.addFrameworkDir("/Library/Frameworks");
+        exe.addFrameworkDir("~/Library/Frameworks");
+        exe.linkFramework("OpenCL");
+    }
 
     exe.linkLibC();
     exe.linkSystemLibrary("opencl");
