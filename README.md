@@ -6,8 +6,13 @@ Heuristics_ by Kokolo Ikeda, Daisuke Tomizawa, Simon Viennot, and Yuu Tanaka.
 
 ## running calculo
 
-If you don't want to install Zig and Futhark, every commit should generate a
-debug build in the [Main GitHub Action](https://github.com/sorenbug/calculo/actions?query=workflow%3AMain).
+If there is no recent-enough [release](https://github.com/sorenbug/calculo/releases),
+you can install Zig and Futhark and follow the [compilation instructions](#compiling-calculo)
+to make an optimized build.
+
+If you don't want to install Zig and Futhark, every commit should generate an
+unoptimized build in the
+[Main GitHub Action](https://github.com/sorenbug/calculo/actions?query=workflow%3AMain).
 
 ### "raylib not found"
 
