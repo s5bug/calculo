@@ -32,6 +32,8 @@ pub fn build(b: *Builder) void {
     exe.linkLibC();
     exe.linkSystemLibrary("opencl");
     exe.linkSystemLibrary("raylib");
+    
+    exe.rdynamic = true;
 
     exe.addIncludeDir("src/algae");
     exe.addCSourceFile("src/algae/algae.c", &[_][]const u8{});
