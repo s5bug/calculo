@@ -6,7 +6,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2.3.2
       - name: Install ocl-icd
         run: |
@@ -23,10 +23,16 @@ jobs:
           version: master
       - name: Build Calculo
         run: zig build
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: calculo
+          path: |
+            zig-cache/bin/calculo
   build-mac:
     runs-on: macos-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2.3.2
       - name: Install Futhark
         run: |
@@ -37,10 +43,16 @@ jobs:
           version: master
       - name: Build Calculo
         run: zig build
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: calculo
+          path: |
+            zig-cache/bin/calculo
   build-windows:
     runs-on: windows-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2.3.2
       - name: Install Futhark
         shell: powershell
@@ -55,3 +67,9 @@ jobs:
           version: master
       - name: Build Calculo
         run: zig build
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: calculo
+          path: |
+            zig-cache/bin/calculo.exe
