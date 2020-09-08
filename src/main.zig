@@ -45,9 +45,9 @@ pub fn main() anyerror!void {
     const ctx = try algae.FutContext.init(cfg);
     defer ctx.deinit();
 
-    const board_data: [2][2]u8 = [_][2]u8 {
-        [_]u8 { 0, 1 },
-        [_]u8 { 2, 3 },
+    const board_data: [2][2]u8 = [_][2]u8{
+        [_]u8{ 0, 1 },
+        [_]u8{ 2, 3 },
     };
 
     const arr = try algae.FutU82D.init(ctx, &board_data);
@@ -56,7 +56,7 @@ pub fn main() anyerror!void {
     var out: f64 = 0.0;
     _ = algae.main(ctx, &out, arr);
 
-    std.log.crit("Result: {}", .{ out });
+    std.log.crit("Result: {}", .{out});
     // var tprovider = TestProvider{};
     // provider.do_thing(tprovider);
     try @import("ui/ui.zig").run(std.heap.c_allocator);

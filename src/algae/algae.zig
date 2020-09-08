@@ -4,17 +4,15 @@ const fut = @cImport({
     @cInclude("algae.h");
 });
 
-pub const Error = error {
-    OutOfMemory,
-};
+pub const Error = error{OutOfMemory};
 
 pub const FutConfig = struct {
     ptr: *fut.futhark_context_config,
 
     pub fn init() Error!@This() {
         var ptr_opt: ?*fut.futhark_context_config = fut.futhark_context_config_new();
-        if(ptr_opt) |ptr| {
-            return FutConfig {
+        if (ptr_opt) |ptr| {
+            return FutConfig{
                 .ptr = ptr,
             };
         } else {
@@ -32,8 +30,8 @@ pub const FutContext = struct {
 
     pub fn init(cfg: FutConfig) Error!@This() {
         var ptr_opt: ?*fut.futhark_context = fut.futhark_context_new(cfg.ptr);
-        if(ptr_opt) |ptr| {
-            return FutContext {
+        if (ptr_opt) |ptr| {
+            return FutContext{
                 .ptr = ptr,
             };
         } else {
@@ -64,8 +62,8 @@ pub const FutU82D = struct {
         const dim1 = @typeInfo(B).Array.len;
 
         var ptr_opt: ?*fut.futhark_u8_2d = fut.futhark_new_u8_2d(ctx.ptr, @ptrCast([*]const u8, data), dim0, dim1);
-        if(ptr_opt) |ptr| {
-            return FutU82D {
+        if (ptr_opt) |ptr| {
+            return FutU82D{
                 .ctx = ctx,
                 .ptr = ptr,
             };
